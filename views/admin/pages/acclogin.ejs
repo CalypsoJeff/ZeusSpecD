@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Login Form</title>
+    <style>
+        /* Add your CSS styling here */
+    </style>
+    <script>
+        function validateForm() {
+            var email = document.getElementById("form1Example13").value;
+            var password = document.getElementById("form1Example23").value;
+            var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Simple email regex pattern
+
+            if (!emailPattern.test(email)) {
+                alert("Please enter a valid email address.");
+                return false;
+            }
+
+            if (password.length < 6) {
+                alert("Password should be at least 6 characters long.");
+                return false;
+            }
+
+            return true;
+        }
+    </script>
+</head>
+
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-5">
+                <section class="content-main mt-80 mb-80">
+                    <div class="card mx-auto card-login">
+                        <div class="card-body">
+                            <h4 class="card-title mb-4">Sign in</h4>
+                            <% if (typeof adminCheck !=='undefined' ) { %>
+                                <div class="alert alert-danger fade show mt-0" id="message" role="alert">
+                                    <%- adminCheck %>
+                                </div>
+                                <% } %>
+                                    <form action="#" method="post" onsubmit="return validateForm()">
+                                        <div class="mb-3">
+                                            <input class="form-control" placeholder="Email" type="email"
+                                                id="form1Example13" name="email" value="admin@gmail.com">
+                                        </div>
+                                        <div class="mb-3">
+                                            <input class="form-control" placeholder="Password" type="password"
+                                                id="form1Example23" name="password" value="admin123">
+                                        </div>
+                                        <div class="mb-4">
+                                            <button type="submit" class="btn btn-primary w-100">Login</button>
+                                        </div>
+                                    </form>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

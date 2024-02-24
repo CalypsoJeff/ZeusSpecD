@@ -1,0 +1,145 @@
+<section class="bg-img1 txt-center p-lr-15 p-tb-12" style="background-image: url('images/bg-01.jpg');">
+    <h2 class="ltext-105 cl0 txt-center">Contact</h2>
+</section>
+
+<div class="bg0 m-t-23 p-b-140">
+    <div class="container">
+        <!-- Filter and Sorting Form -->
+        <form id="filterForm" action="/shop" method="GET">
+            <!-- Category Filter Dropdown -->
+            <div class="flex-w flex-l-m filter-tope-group m-tb-10">
+                <% if (categories.length > 0) { %>
+                    <% categories.forEach(category => { %>
+                        <li>
+                            <button class="stext-106 cl6 hov1 bor3 trans-04 m-r-32 m-tb-5" data-filter="categoryFilter">
+                                <a href="/shop?p=<%= currentPage %>&category=<%= category.categoryName %>" class="text-dark <%= selectedCategory === category._id ? 'text-dark' : '' %>">
+                                    <%= category.categoryName %>
+                                </a>
+                            </button>
+                        </li>
+                    <% }); %>
+                <% } else { %>
+                    <h3>NO CATEGORIES</h3>
+                <% } %>
+            </div>
+
+            <!-- Sorting Options Dropdown -->
+            <div class="filter-dropdown">
+                <select name="sortBy" onchange="document.getElementById('filterForm').submit()">
+                    <option value="priceLowToHigh" <%= sortBy === 'priceLowToHigh' ? 'selected' : '' %>>Price: Low to High</option>
+                    <option value="priceHighToLow" <%= sortBy === 'priceHighToLow' ? 'selected' : '' %>>Price: High to Low</option>
+                </select>
+            </div>
+
+            <!-- Price Range Filter Dropdown -->
+            <div class="filter-dropdown">
+                <select name="priceRange" onchange="document.getElementById('filterForm').submit()">
+                    <option value="all" <%= priceRange === 'all' ? 'selected' : '' %>>All Prices</option>
+                    <option value="10000-20000" <%= priceRange === '10000-20000' ? 'selected' : '' %>>₹10000.00 - ₹20000.00</option>
+                    <option value="20000-50000" <%= priceRange === '20000-50000' ? 'selected' : '' %>>₹20000.00 - ₹50000.00</option>
+                    <option value="50000-100000" <%= priceRange === '50000-100000' ? 'selected' : '' %>>₹50000.00 - ₹100000.00</option>
+                    <option value="100000-150000" <%= priceRange === '100000-150000' ? 'selected' : '' %>>₹100000.00 - ₹150000.00</option>
+                    <option value="150000+" <%= priceRange === '150000+' ? 'selected' : '' %>>₹150000.00+</option>
+                </select>
+            </div>
+            <!-- Search Bar -->
+            <div class="search-product pos-relative bo4 of-hidden">
+                <input class="s-text7 size6 p-l-23 p-r-50 search-input" type="text" name="search" placeholder="Search Products..." value="<%= search %>">
+                <button class="search-button" type="submit">
+                    <i class="fs-12 fa fa-search" aria-hidden="true"></i>
+                </button>
+            </div>
+        </form>
+        <br><br><br>
+
+        <!-- Products Grid -->
+        <div class="row isotope-grid">
+            <% for (let i=0; i < product.length; i++) { %>
+                <div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item women">
+                    <!-- Block2 -->
+                    <% for (let j=0; j < product[i].primaryImage.length; j++) { %>
+                        <div class="block2">
+                            <div class="block2-pic hov-img0">
+                                <img src="/admin/uploads/<%= product[i].primaryImage[0].name %>" alt="IMG-PRODUCT">
+                            </div>
+
+                            <div class="block2-txt flex-w flex-t p-t-14">
+                                <div class="block2-txt-child1 flex-col-l">
+                                    <a href="/product?id=<%= product[i]._id %>"
+                                        class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
+                                        <%= product[i].title %>
+                                    </a>
+
+                                    <span class="stext-105 cl3">
+                                        Rs<%= product[i].salePrice %>
+                                    </span>
+                                </div>
+
+                                <div class="block2-txt-child2 flex-r p-t-3">
+                                    <a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2">
+                                        <img class="icon-heart1 dis-block trans-04"
+                                            src="assets/images/icons/icon-heart-01.png" alt="ICON">
+                                        <img class="icon-heart2 dis-block trans-04 ab-t-l"
+                                            src="assets/images/icons/icon-heart-02.png" alt="ICON">
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <% } %>
+                </div>
+                <% } %>
+        </div>
+
+
+</div>
+
+</div>
+<script>
+    // No additional JavaScript needed for form submission as it's handled by the onchange event in each select element
+</script>
+<style>
+    /* Add your custom styles for dropdowns here */
+    .filter-dropdown select {
+        padding: 10px;
+        margin-bottom: 10px;
+        width: 100%; /* Adjust width as needed */
+        border: 1px solid #ccc; /* Style as per your theme */
+    }
+
+    /* Additional styles */
+
+
+    /* Custom Styles for Search Input */
+.search-input {
+    padding: 10px 20px;
+    border: 2px solid #ddd; /* Light grey border */
+    border-right: none; /* Remove right border */
+    font-size: 16px; /* Larger font size */
+    color: #333; /* Dark grey text */
+    border-radius: 5px 0 0 5px; /* Rounded corners on the left side */
+    width: calc(100% - 45px); /* Adjust width to fit with the button */
+}
+
+/* Custom Styles for Search Button */
+.search-button {
+    padding: 10px 20px;
+    border: 2px solid #007bff; /* Blue border */
+    background-color: #007bff; /* Blue background */
+    color: white; /* White text */
+    font-size: 16px; /* Match input font size */
+    cursor: pointer; /* Cursor changes to pointer to indicate it's clickable */
+    border-radius: 0 5px 5px 0; /* Rounded corners on the right side */
+}
+
+.search-button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+    border-color: #0056b3; /* Match border color to background */
+}
+
+/* Ensures the input and button are aligned correctly */
+.search-product {
+    display: flex;
+    width: 100%;
+}
+
+</style>

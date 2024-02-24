@@ -1,0 +1,114 @@
+<div class="screen-overlay"></div>
+<aside class="navbar-aside" id="offcanvas_aside">
+   <div class="aside-top">
+    <a href="index.html" class="brand-wrap">
+        <img src="/admin/assets/imgs/theme/logo.png" class="logo" alt="ZeusSpec Dashboard">
+    </a>
+    <div>
+        <button class="btn btn-icon btn-aside-minimize"> <i class="text-muted material-icons md-menu_open"></i> </button>
+    </div>
+</div>
+<nav>
+    <ul class="menu-aside">
+        <li class="menu-item ">
+            <a class="menu-link" href="/admin/dashboard"  onclick="highlightMenuItem(this)" > <i class="icon material-icons md-home"></i>
+                <span class="text">Dashboard</span>
+            </a>
+        </li>
+        <li class="menu-item ">
+            <a class="menu-link" href="/admin/product"   onclick="highlightMenuItem(this)"  > <i class="icon material-icons md-shopping_bag"></i>
+                <span class="text">Products</span>
+            </a>
+        </li>
+       
+        
+        <li class="menu-item">
+            <a class="menu-link" href="/admin/category"  onclick="highlightMenuItem(this)" > <i class="icon material-icons md-store"></i>
+                <span class="text">Categories</span>
+            </a>
+           
+        </li>
+
+        <li class="menu-item ">
+            <a class="menu-link" href="/admin/orders"  onclick="highlightMenuItem(this)" > <i class="icon material-icons md-shopping_cart"></i>
+                <span class="text">Orders</span>
+            </a>
+          
+        </li>
+
+
+        <li class="menu-item ">
+            <a class="menu-link" href="/admin/user"  onclick="highlightMenuItem(this)" > <i class="icon material-icons md-add_box"></i>
+                <span class="text">Users</span>
+            </a>
+        </li>
+       
+        <li class="menu-item ">
+            <a class="menu-link" href="/admin/manageCoupons/:page" onclick="highlightMenuItem(this)" > <i class="icon material-icons md-local_offer"></i>
+                <span class="text">Coupon</span>
+            </a>
+            
+        </li>
+        <li class="menu-item">
+            <a class="menu-link" href="/admin/manageBanner"   onclick="highlightMenuItem(this)" > <i class="icon material-icons md-local_offer"></i>
+                <span class="text">Banner</span>
+            </a>
+        </li>
+        
+        <li class="menu-item ">
+            <a class="menu-link" href="/admin/salesreport"  onclick="highlightMenuItem(this)" > <i class="icon material-icons md-monetization_on"></i>
+                <span class="text">Sales</span>
+            </a>
+        </li>
+
+    </ul>
+    
+    <br>
+    <br>
+</nav>
+</aside>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        function highlightMenuItem() {
+            var currentPath = window.location.pathname;
+            var links = document.querySelectorAll('.menu-link');
+
+            for (var i = 0; i < links.length; i++) {
+                var link = links[i];
+                var href = link.getAttribute('href');
+
+                // Check if the current path matches the link's href
+                if (currentPath === href) {
+                    var menuItems = document.querySelectorAll('.menu-item');
+                    for (var j = 0; j < menuItems.length; j++) {
+                        menuItems[j].classList.remove('active');
+                    }
+
+                    link.closest('.menu-item').classList.add('active');
+                    break; 
+                }
+            }
+        }
+
+        // Add event listener to highlight the active menu item on page load
+        highlightMenuItem();
+
+        // Add event listeners to your links
+        var links = document.querySelectorAll('.menu-link');
+        links.forEach(function(link) {
+            link.addEventListener('click', function() {
+                highlightMenuItem();
+            });
+        });
+    });
+</script>
+
+
+<style>
+    .menu-item.active {
+        background-color:lightblue 
+        
+    }
+</style>

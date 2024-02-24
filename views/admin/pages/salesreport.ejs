@@ -1,0 +1,228 @@
+<div class="row">
+    <div class="col-lg-12 d-flex align-items-stretch">
+        <div class="card w-100">
+            <div class="card-body p-4">
+                <h1 class="card-title">Sales Report</h1>
+                <div class="form-group">
+                    <label for="fromDate">From Date:</label>
+                    <input type="date" class="form-control" id="fromDate" name="fromDate" required />
+                </div>
+                <div class="form-group">
+                    <label for="toDate">To Date:</label>
+                    <input type="date" class="form-control" id="toDate" name="endDate" required />
+                </div>
+                <button type="button" class="btn btn-primary" id="generateReport">Generate Report</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row d-flex justify-content-center">
+    <div id="table" class="col-lg-10">
+        <div class="d-flex justify-content-between mb-3">
+            <h3 id="heading"></h3>
+        </div>
+    </div>
+</div>
+
+
+<div class="row d-flex justify-content-center">
+    <div id="exportBtnContainer" class="col-lg-10">
+            <button id="exportBtn" class="btn btn-primary d-none">Export</button>
+        </div>
+    </div>
+<br><br><br>
+<div class="modal fade" id="exportOptionsModal" tabindex="-1" aria-labelledby="exportOptionsModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exportOptionsModalLabel">Export Options</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Select an export format:</p>
+                <div class="d-flex gap-3">
+                    <button id="pdfBtn" class="btn btn-primary">Export as PDF</button>
+                    <button id="excelBtn" class="btn btn-success">Export as Excel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.2/jspdf.debug.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.3/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js"></script>
+
+
+<script>
+
+      // Function to close the export options modal
+      function closeExportModal() {
+        $("#exportOptionsModal").modal("hide");
+    }
+    document.getElementById("generateReport").addEventListener("click", () => {
+        const fromDate = document.getElementById("fromDate").value;
+        const toDate = document.getElementById("toDate").value;
+        const generateButton = document.getElementById("generateReport");
+        const tableContainer = document.getElementById("table");
+        const pdfBtn = document.getElementById("pdfBtn");
+        const excelBtn = document.getElementById("excelBtn");
+        const heading = document.getElementById("heading");
+        const exportBtn = document.getElementById("exportBtn");
+        generateButton.setAttribute("disabled", true);
+        generateButton.innerHTML = "Generating...";
+        fetch("/admin/get/sales-report?fromDate=" + fromDate + "&toDate=" + toDate, {
+            method: "GET",
+        })
+            .then((response) => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    console.log("Something Went wrong");
+                }
+            })
+            .then((data) => {
+                // Clear previous content
+                tableContainer.innerHTML = '';
+
+                const table = generateTable(data);
+                tableContainer.appendChild(table);
+                addGrandTotalRow(table, data);
+                heading.textContent = `Sales-report-${fromDate}-${toDate}.`;
+            })
+            .catch((error) => {
+                console.error(error);
+            })
+            .finally(() => {
+                generateButton.removeAttribute("disabled");
+                generateButton.innerHTML = "Generate Report";
+                exportBtn.classList.remove("d-none");
+                exportBtn.classList.add("d-block");
+            });
+    });
+    function generateTable(data) {
+    const table = document.createElement("table");
+    table.className = "table table-bordered table-striped";
+    const thead = document.createElement("thead");
+    const headerRow = document.createElement("tr");
+
+    // Column headers
+    const headers = ["Serial No", "Order ID", "Grand Total", "Order Date", "Payment Method", "Product Details"];
+    headers.forEach(header => {
+        const th = document.createElement("th");
+        th.textContent = header;
+        th.style.textAlign = "center";
+        headerRow.appendChild(th);
+    });
+
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+    const tbody = document.createElement("tbody");
+
+    // Generate table body
+    data.forEach((item, index) => {
+        const row = document.createElement("tr");
+
+        // Serial No
+        const serialCell = document.createElement("td");
+        serialCell.textContent = index + 1;
+        serialCell.style.textAlign = "center";
+        row.appendChild(serialCell);
+
+        // Order ID
+        const idCell = document.createElement("td");
+        idCell.textContent = item.orderId;
+        row.appendChild(idCell);
+
+        // Grand Total
+        const totalCell = document.createElement("td");
+        totalCell.textContent = item.grandTotal;
+        row.appendChild(totalCell);
+
+        // Order Date
+        const dateCell = document.createElement("td");
+        dateCell.textContent = new Date(item.orderDate).toLocaleDateString();
+        row.appendChild(dateCell);
+
+        // Payment Method
+        const paymentCell = document.createElement("td");
+        paymentCell.textContent = item.paymentMethod;
+        row.appendChild(paymentCell);
+
+        // Product Details
+        const productsCell = document.createElement("td");
+        const productDetails = item.products.map(product => `${product.name}, Price: ₹${product.price}, Quantity: ${product.quantity}`).join("; ");
+        productsCell.textContent = productDetails;
+        row.appendChild(productsCell);
+
+        tbody.appendChild(row);
+    });
+
+    table.appendChild(tbody);
+    return table;
+}
+
+
+
+document.getElementById("pdfBtn").addEventListener("click", function () {
+    html2canvas(document.getElementById("table")).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF({
+            orientation: 'landscape',
+        });
+
+        const imgWidth = 280;
+        const pageHeight = pdf.internal.pageSize.height;
+        let imgHeight = canvas.height * imgWidth / canvas.width;
+        let heightLeft = imgHeight;
+
+        let position = 0;
+
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+
+        while (heightLeft >= 20) {
+            position = heightLeft - imgHeight;
+            pdf.addPage();
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+        }
+
+        pdf.save(`sales-report-${fromDate.value}-${toDate.value}.pdf`);
+        closeExportModal(); 
+    });
+});
+
+    document.getElementById("excelBtn").addEventListener("click", function () {
+    const ws_name = "Sales Report";
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.table_to_sheet(document.getElementById("table"));
+
+    
+    const wscols = [
+        {wch: 10}, 
+        {wch: 20}, 
+        {wch: 15}, 
+        {wch: 15}, 
+        {wch: 20}, 
+        {wch: 30}  
+    ];
+
+    ws['!cols'] = wscols;
+    XLSX.utils.book_append_sheet(wb, ws, ws_name);
+
+    XLSX.writeFile(wb, `sales-report-${fromDate.value}-${toDate.value}.xlsx`);
+    closeExportModal(); 
+});
+
+    document.getElementById("exportBtn").addEventListener("click", () => {
+        $("#exportOptionsModal").modal("show");
+    });
+
+
+</script>

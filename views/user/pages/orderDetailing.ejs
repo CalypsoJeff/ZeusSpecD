@@ -1,0 +1,332 @@
+<!-- orderDetails.ejs -->
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+
+  <h1>Order Details</h1>
+
+  <% if (orderDetails) { %>
+
+    <% orderDetails.products.forEach((product) => { %>
+      <div class="card">
+        <div class="card-header">
+          <h4>Product: <%= product.product.title %></h4>
+        </div>
+        <div class="card-body">
+          <img src="/admin/uploads/<%= product.product.primaryImage[0].name %>" alt="Product Image" class="product-image">
+
+          <div class="order-details">
+            <p>Quantity: <%= product.quantity %></p>
+            <p>Price: <%= product.price %></p>
+            <p>Total: <%= orderDetails.grandTotal %></p>
+
+          </div>
+        </div>
+      </div>
+      <% }) %>    
+
+      <% if (orderDetails.status !== 'Cancelled' && orderDetails.status !== 'Delivered' && orderDetails.status !== 'Return Requested' && orderDetails.status !== 'Return Accepted' && orderDetails.status !== 'Return Rejected') { %>
+        <div class="d-flex justify-content-center">
+          <% if (orderDetails.paymentMethod === 'razorpay' || orderDetails.paymentMethod === 'wallet') { %>
+            <!-- Modal Trigger Button for Razorpay -->
+            <button type="button" class="btn btn-danger cancel-order-btn" data-toggle="modal" data-target="#razorpayRefundModal" data-order-id="<%= orderDetails._id %>" onclick="handleCancelOrder('<%= orderDetails._id %>', '<%= orderDetails.paymentMethod %>')">Cancel Order</button>
+          <% } else if (orderDetails.paymentMethod === 'cashonDelivery') { %>
+            <!-- Modal Trigger Button for Cash on Delivery -->
+            <button type="button" class="btn btn-danger cancel-order-btn" data-toggle="modal" data-target="#cashOnDeliveryCancelModal" data-order-id="<%= orderDetails._id %>" onclick="handleCancelOrder('<%= orderDetails._id %>', '<%= orderDetails.paymentMethod %>')">Cancel Order</button>
+          <% } %>
+        </div>
+      <% } else if (orderDetails.status === 'Delivered') { %>
+        <!-- Display return button for delivered orders -->
+        <div class="d-flex justify-content-center">
+          <button type="button" class="btn btn-primary return-order-btn" data-toggle="modal" data-target="#returnModal" data-order-id="<%= orderDetails._id %>" onclick="handleReturnOrder('<%= orderDetails._id %>')">Return Order</button>
+        </div>
+      <% } %>
+          
+  
+
+    <div class="order-summary">
+      <h2>Order Summary</h2>
+      <p>Order Number: <%= orderDetails._id %></p>
+      <p>Date: <%= orderDetails.orderDate.toLocaleDateString() %></p>
+      <p>Total: <%= orderDetails.grandTotal %></p>
+      <p id ="status">Status: <%= orderDetails.status %></p>
+      <p>Payment: <%= orderDetails.paymentMethod %></p>
+      <% if (orderDetails.address) { %>
+        <h3>Delivery Address</h3>
+        <p>Name: <%= orderDetails.address.user_name %>
+        </p> <!-- Adjust according to your address schema -->
+        <p>address: <%= orderDetails.address.address %>
+        </p>
+        <p>town: <%= orderDetails.address.town %>
+        </p>
+        <p>State: <%= orderDetails.address.state %>
+        </p>
+        <p>Pincode: <%= orderDetails.address.pincode %>
+        </p>
+        <p>Phone: <%= orderDetails.address.phone %>
+        </p>
+        <% } else { %>
+          <p>Address not available.</p>
+          <% } %>
+
+          <a type="button" href="/invoice/?id=<%= orderDetails._id %>" download="invoice.pdf" class="btn btn-primary" id="invoiceDownload">Download Invoice</a>
+
+    </div>
+
+   
+
+  <% } else { %>
+
+    <p>No order details available.</p>
+
+  <% } %>
+
+
+<!-- Refund Modal for Razorpay -->
+<div class="modal fade" id="razorpayRefundModal" tabindex="-1" role="dialog" aria-labelledby="razorpayRefundModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Refund Money</h5>
+        <button type="button" class="btn-close"
+           data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>If you are cancelling the order, how do you want to refund the amount?</p>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="handleAddToWallet('<%= orderDetails._id %>', '<%= orderDetails.grandTotal %>')">Add to Wallet</button>
+        <button type="button" class="btn btn-secondary"  onclick="handleRefundToBank()">Refund to Bank</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Cancel Modal for Cash on Delivery -->
+<div class="modal fade" id="cashOnDeliveryCancelModal" tabindex="-1" role="dialog" aria-labelledby="cashOnDeliveryCancelModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="cashOnDeliveryCancelModalLabel">Order Cancelled</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>Your order has been cancelled</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<script>
+  // document.getElementById('invoiceDownload').addEventListener('click', function () {
+  //   console.log('Order ID:', '<%= orderDetails._id %>');
+  //     const orderId = '<%= orderDetails._id %>';
+  //     const url =`/orderDetailing?id=${orderId}&downloadPdf=true`;
+  //     window.location.href = url;
+  // });
+</script>
+<script>
+  // Function to handle return request and update status
+  const handleReturnOrder = async (orderId) => {
+    try {
+      // Assuming requestReturn function is available on the server-side
+      const response = await fetch('/requestReturn', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orderId: orderId,
+        }),
+      });
+
+      if (response.ok) {
+        console.log('Return request sent successfully');
+        document.getElementById('status').innerHTML = 'Status: Return Requested';
+
+        // Hide the "Return Order" button
+        document.querySelector('.return-order-btn').style.display = 'none';
+      } else {
+        console.error('Failed to send return request');
+        // Handle the error or show an error message to the user
+      }
+    } catch (error) {
+      console.error('Error sending return request:', error);
+    }
+  };
+</script>
+<!-- Include this script in your HTML file -->
+<script>
+  // Function to handle order cancellation and update status
+  const handleCancelOrder = async (orderId, paymentMethod) => {
+    try {
+      // Assuming updateOrderStatus function is available on the server-side
+      const response = await fetch('/cancelSingleOrder', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orderId: orderId,
+          status: 'Cancelled',
+          paymentMethod: paymentMethod,
+        }),
+      });
+     
+      if (response.status == 200) {
+        console.log('Order status updated successfully');
+        document.getElementById('status').innerHTML = 'Status : Cancelled'
+
+        // Hide the "Cancel Order" button
+        document.querySelectorAll('.cancel-order-btn').forEach(link => {
+          link.style.display = 'none';
+        });
+
+
+      } else {
+        console.error('Failed to update order status');
+        // Handle the error or show an error message to the user
+      }
+    } catch (error) {
+      console.error('Error updating order status:', error);
+    }
+  };
+
+  // Function to handle the "Add to Wallet" button click
+  const handleAddToWallet = async (orderId, refundAmount) => {
+    try {
+      // Assuming addToWallet function is available on the server-side
+      const response = await fetch('/addToWallet', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orderId: orderId,
+          refundAmount: refundAmount,
+          description: 'Refund from order cancellation',
+        }),
+      });
+      $('#razorpayRefundModal').modal('hide');
+
+      if (response.ok) {
+        console.log('Amount added to wallet successfully');
+        // Show SweetAlert for successful wallet addition
+        Swal.fire({
+          icon: 'success',
+          title: 'Money Added to Wallet',
+          text: 'The money has been successfully added to your wallet.',
+        });
+        
+      } else {
+        console.error('Failed to add amount to wallet');
+      }
+    } catch (error) {
+    console.error('Error adding amount to wallet:', error);
+  }
+};
+
+  // Function to handle the "Refund to Bank" button click
+  const handleRefundToBank = () => {
+    try{
+    // Assuming you want to initiate a refund to the bank
+    // You can show a SweetAlert here as well if needed
+    Swal.fire({
+      icon: 'info',
+      title: 'Refund Initiated',
+      text: 'Refund process to the bank has been initiated.',
+    });
+    $('#razorpayRefundModal').modal('hide');
+  }
+
+    catch (error) {
+      console.error('Error adding amount to wallet:', error);
+    }
+  };
+</script>
+
+
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+    }
+
+    h1 {
+        text-align: center;
+        margin-top: 50px;
+        color: #333;
+    }
+
+    h2 {
+        text-align: center;
+        margin-top: 20px;
+        color: #333;
+    }
+
+
+    .card {
+        width: 70%;
+        margin: 20px auto;
+        background-color: #fff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border-radius: 5px;
+    }
+
+    .card-header {
+        background-color: #f0f0f0;
+        padding: 10px;
+        border-bottom: 1px solid #ccc;
+    }
+
+    .card-body {
+        padding: 20px;
+        display: flex;
+        align-items: center;
+    }
+
+    .product-image {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        margin-right: 20px;
+    }
+
+    .order-details {
+        flex-grow: 1;
+    }
+
+    .order-summary {
+        width: 70%;
+        margin: 20px auto;
+        background-color: #fff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border-radius: 5px;
+        padding: 20px;
+    }
+
+    p {
+        margin: 5px 0;
+    }
+
+    a {
+        color: #007BFF;
+        text-decoration: none;
+    }
+</style>
+
+
+
+<!-- Bootstrap JS (Popper.js and jQuery are required for Bootstrap JS) -->
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+
+

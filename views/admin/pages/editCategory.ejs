@@ -1,0 +1,61 @@
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Edit Category</h3>
+                </div>
+                <div class="card-body">
+                    <form action="" method="post" onsubmit="return validateCategoryForm()">
+                        <div class="form-group">
+                            <label for="categoryName">Category Name</label>
+                            <input type="text" class="form-control" name="updatedName" id="categoryName" value="<%= values.categoryName %>" placeholder="Enter category name" required>
+                            <div id="categoryNameError" class="text-danger"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="categoryOffer">Offer(%)</label>
+                            <input type="text" class="form-control" name="addOffer" id="categoryOffer" value="<%= values.categoryOffer %>" placeholder="Enter category offer" >
+                            <div id="categoryOfferError" class="text-danger"></div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Category</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function validateCategoryForm() {
+        let isValid = true;
+        const categoryName = document.getElementById('categoryName').value.trim();
+        const categoryOffer = document.getElementById('categoryOffer').value.trim();
+        const categoryNameError = document.getElementById('categoryNameError');
+        const categoryOfferError = document.getElementById('categoryOfferError');
+
+        // Validate Category Name
+        if (categoryName === '') {
+            categoryNameError.textContent = 'Category name is required.';
+            isValid = false;
+        } else {
+            categoryNameError.textContent = '';
+        }
+
+        // Validate Offer - Offer can be empty or between 0 to 100
+        if (categoryOffer !== '') { // Only validate if offer is not empty
+            const offerValue = parseFloat(categoryOffer);
+            if (isNaN(offerValue) || offerValue < 0 || offerValue > 100) {
+                categoryOfferError.textContent = 'Please enter a valid offer between 0 and 100.';
+                isValid = false;
+            } else {
+                categoryOfferError.textContent = '';
+            }
+        } else {
+            // If offer is empty, clear any existing error message
+            categoryOfferError.textContent = '';
+        }
+
+        return isValid; // Return the overall validity
+    }
+</script>

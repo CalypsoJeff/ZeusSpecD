@@ -1,0 +1,102 @@
+<body>
+    <div class="container rounded bg-white mt-5 mb-5 pt-5">
+        <div class="row">
+            <div class="col-md-3 border-right">
+                <div class="d-flex flex-column align-items-center text-center p-3 ">
+                    <img class="rounded-circle mt-5" width="150px" src="https://st3.depositphotos.com/15648834/17930/v/600/depositphotos_179308454-stock-illustration-unknown-person-silhouette-glasses-profile.jpg">
+                    <span class="font-weight-bold"><%= user.email %></span>
+                    <span class="text-black-50"><%= user.username %></span>
+                    <span> </span>
+                </div>
+                <div class="d-flex flex-column text-center p-1">
+                    <button class="btn btn-primary profile-button" type="button"><a href="/address">Addresses</a></button>
+                </div>
+                <div class="d-flex flex-column text-center p-1">
+                    <button class="btn btn-primary profile-button" type="button"><a href="/orderList">Orders</a></button>
+                </div>
+                <div class="d-flex flex-column text-center p-1">
+                    <button class="btn btn-primary profile-button" type="button"><a href="/wallet">Wallet</a></button>
+                </div>
+            </div>
+            <div class="col-md-5 border-right">
+                <div class="p-3 py-5">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="text-right">Profile Settings</h4>
+                    </div>
+                    <form action="/userprofile" method="post" onsubmit="return validateForm()">
+                        <div class="row mt-2">
+                            <div class="col-md-6">
+                                <label class="labels">Name</label>
+                                <input type="text" class="form-control" placeholder="Name" value="<%= user.username %>" name="username" id="username" required="true">
+                                <div id="username-error" class="text-danger"></div> <!-- Error message placeholder -->
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <label class="labels">Email ID</label>
+                                <input type="text" class="form-control" placeholder="enter email id" value="<%= user.email %>" name="email" id="email" readonly>
+                            </div>
+                        </div>
+                        <div class="mt-5 text-center">
+                            <button class="btn btn-primary profile-button" type="submit" value="Submit" name="submit" style="margin-left:20px; margin-top: -5px; display: block;">Save Profile</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <style>
+        body {
+            background: rgb(249, 248, 250);
+        }
+        
+        .form-control:focus {
+            box-shadow: none;
+            border-color: #BA68C8;
+        }
+        
+        .profile-button {
+            background: rgb(99, 39, 120);
+            box-shadow: none;
+            border: none;
+        }
+        
+        .profile-button:hover {
+            background: #682773;
+        }
+        
+        .profile-button:focus {
+            background: #682773;
+            box-shadow: none;
+        }
+        
+        .profile-button:active {
+            background: #682773;
+            box-shadow: none;
+        }
+        
+        .labels {
+            font-size: 11px;
+        }
+        
+        .text-danger {
+            color: #dc3545; /* Bootstrap default danger color */
+        }
+    </style>
+
+    <script>
+        function validateForm() {
+            // Resetting error message
+            document.getElementById('username-error').textContent = '';
+            
+            // Validate Username to allow first name and optional second name
+            const usernameInput = document.getElementById('username');
+            if (!/^[A-Z][a-z]*(\s[A-Z][a-z]*)?$/.test(usernameInput.value)) {
+                document.getElementById('username-error').textContent = 'Username must start with a capital letter and may include an optional second name, also starting with a capital letter.';
+                return false;
+            }
+            
+            return true;
+        }
+    </script>
+</body>

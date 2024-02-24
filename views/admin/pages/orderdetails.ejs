@@ -1,0 +1,221 @@
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">Order detail</h2>
+            <p>Details for Order ID:<%=order._id%></p>
+        </div>
+    </div>
+    <div class="card">
+        <header class="card-header">
+            <div class="row align-items-center">
+                <div class="col-lg-6 col-md-6 mb-lg-0 mb-15">
+                    <span>
+                        <i class="material-icons md-calendar_today"></i> <b><%=order.orderDate.toLocaleString()%></b>
+                    </span> <br>
+                    <small class="text-muted">Order ID: <%=order._id%></small>
+                </div>
+                <div class="col-lg-6 col-md-6 ms-auto text-md-end" id="statusDropdown">
+                    <% if (['Delivered', 'Cancelled', 'Return Accepted', 'Return Rejected'].includes(order.status)) { %>
+                        <p>Status: <%= order.status %></p>
+                    <% } else { %>
+                        <form action="/admin/orderdetails/update/<%= order._id %>" method="POST">
+                            <select class="form-select d-inline-block mb-lg-0 mb-15 mw-200" name="status" <% if (['Delivered', 'Cancelled', 'Return Accepted', 'Return Rejected'].includes(order.status)) { %>disabled<% } %>>
+                                <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                                <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                                <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                                <option value="Cancelled" <%= order.status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                                <option value="Return Accepted" <%= order.status === 'Return Accepted' ? 'selected' : '' %>>Return Accepted</option>
+                                <option value="Return Rejected" <%= order.status === 'Return Rejected' ? 'selected' : '' %>>Return Rejected</option>
+                            </select>
+                            <div>
+                                <button class="btn btn-sm btn-primary btn-block ml-4 mt-2" style="width:200px;" type="submit">Update</button>
+                            </div>
+                        </form>
+                    <% } %>
+                </div>
+                
+                    </form>
+                </div>
+                
+                
+            </div>
+        </header> <!-- card-header end// -->
+        <div class="card-body">
+            <div class="row mb-50 mt-20 order-info-wrap">
+                <div class="col-md-4">
+                    <article class="icontext align-items-start">
+                        <span class="icon icon-sm rounded-circle bg-primary-light">
+                            <i class="text-primary material-icons md-person"></i>
+                        </span>
+                        <div class="text">
+                            <h6 class="mb-1">Customer</h6>
+                            <p class="mb-1">
+                                <%=order.user.username%> <br> <%=order.user.email%><br> <%=order.address.phone%>
+                            </p>
+                        </div>
+                    </article>
+                </div> <!-- col// -->
+                <div class="col-md-4">
+                    <article class="icontext align-items-start">
+                        <span class="icon icon-sm rounded-circle bg-primary-light">
+                            <i class="text-primary material-icons md-local_shipping"></i>
+                        </span>
+                        <div class="text">
+                            <h6 class="mb-1">Order info</h6>
+                            <p class="mb-1">
+                                Shipping: Fargo express <br> Pay method: <%=order.paymentMethod%> 
+                            </p>
+                           
+                        </div>
+                    </article>
+                </div> <!-- col// -->
+                <div class="col-md-4">
+                    <article class="icontext align-items-start">
+                        <span class="icon icon-sm rounded-circle bg-primary-light">
+                            <i class="text-primary material-icons md-place"></i>
+                        </span>
+                        <div class="text">
+                            <h6 class="mb-1">Deliver to</h6>
+                            <p class="mb-1">
+                                <%=order.address.address%> <br><%=order.address.town%> <br> <%=order.address.pincode%>
+                            </p>
+                           
+                        </div>
+                    </article>
+                </div> <!-- col// -->
+            </div> <!-- row // -->
+            <div class="row">
+                <div class="col-lg-7">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th width="40%">Product</th>
+                                    
+                                    <th width="20%">Quantity</th>
+                                    <th width="20%" class="text-end">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% order.products.map((items)=>{%>
+                                <tr>
+                                    <td>
+                                        <a class="itemside" href="#">
+                                            <div class="left">
+                                                <img src="/admin/uploads/<%= order.products[0].product.primaryImage[0].name %>" width="40" height="40" class="img-xs" alt="Item">
+                                            </div>
+                                            <div class="info"><%=items.product.title%></div>
+                                        </a>
+                                    </td>
+                                    
+                                    <td> <%=items.quantity%></td>
+                                    <td class="text-end"><%=items.product.salePrice%></td>
+                                </tr>  
+                            <%})%>
+                                <tr>
+                                    <td colspan="4">
+                                        <article class="float-end">
+                                            <dl class="dlist">
+                                                <dt>Subtotal:</dt>
+                                                <dd><%=order.grandTotal%></dd>
+                                            </dl>
+                                           
+                                            <dl class="dlist">
+                                                <dt>Grand total:</dt>
+                                                <dd> <b class="h5"><%=order.grandTotal%></b> </dd>
+                                            </dl>
+                                            <dl class="dlist">
+                                                <dt class="text-muted">Status:</dt>
+                                                <dd id="orderStatus"></dd>
+                                                <dd>
+                                                    <span class="badge rounded-pill alert-success text-success">Payment done</span>
+                                                </dd>
+                                            </dl>
+                                        </article>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div> 
+                 
+                </div> 
+                <div class="col-lg-1"></div>
+                <div class="col-lg-4">
+                    <% if (order.status === 'Return Requested') { %>
+                      <!-- Display buttons for accepting or rejecting return -->
+                      <button type="button" class="btn btn-success" onclick="handleAcceptReturn('<%= order._id %>')">Accept Return</button>
+                      <button type="button" class="btn btn-danger" onclick="handleRejectReturn('<%= order._id %>')">Reject Return</button>
+                    <% } else { %>
+                      <!-- Display order status badge if not in "Return Requested" status -->
+                      <span class="badge1 custom-box"><%= order.status %></span>
+                    <% } %>
+                  </div>
+                  
+            </div>
+        </div> 
+    </div> 
+</section> 
+
+<style>
+    .badge1 {
+      display: inline-block; 
+      padding: 8px 12px; 
+      border: 1px solid white; 
+      background-color: #d4edda; 
+      color: black; 
+      border-radius: 5px; 
+    }
+  </style>
+
+<!-- Include this script in your HTML file -->
+<script>
+// Function to handle accepting return
+const handleAcceptReturn = async (orderId) => {
+  try {
+    const response = await fetch(`/acceptReturn/${orderId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.ok) {
+      console.log('Return accepted successfully');
+      // Reload the page after a successful return acceptance
+      window.location.reload();
+    } else {
+      console.error('Failed to accept return');
+      // Handle the error or show an error message to the user
+      window.location.reload();
+
+    }
+  } catch (error) {
+    console.error('Error accepting return:', error);
+  }
+};
+
+// Function to handle rejecting return
+const handleRejectReturn = async (orderId) => {
+  try {
+    const response = await fetch(`/rejectReturn/${orderId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (response.ok) {
+      console.log('Return rejected successfully');
+      // Reload the page after a successful return rejection
+      window.location.reload();
+    } else {
+      console.error('Failed to reject return');
+      // Handle the error or show an error message to the user
+      window.location.reload();
+
+    }
+  } catch (error) {
+    console.error('Error rejecting return:', error);
+  }
+};
+</script>

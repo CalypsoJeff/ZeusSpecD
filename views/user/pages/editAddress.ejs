@@ -1,0 +1,204 @@
+<main class="main pt-150">
+    <section class="mt-50 mb-50">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-25">
+                        <h3>Edit Address</h3>
+                    </div>
+                    <div class="row pt-4">
+                        <form id="myForm" class="address-form" onsubmit="return validateForm()">
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="name"> Name<span class="required">*</span></label>
+                                        <input type="text" name="name" class="form-control" placeholder="Name"
+                                            value="<%= address.user_name %>" id="name" required />
+                                        <div id="nameError" class="error-message"></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="address">Address <span class="required">*</span></label>
+                                        <input type="text" name="address" class="form-control"
+                                            value="<%= address.address %>" placeholder="Street Address" id="address"
+                                            required />
+                                        <div id="addressError" class="error-message"></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6  ">
+                                    <div class="form-group mt-2">
+                                        <label for="city">Town / City <span class="required">*</span></label>
+                                        <input type="text" name="town" class="form-control" value="<%= address.town %>"
+                                            placeholder="Town / City" id="town" required />
+                                        <div id="townError" class="error-message"></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 ">
+                                    <div class="form-group mt-2">
+                                        <label for="state">State<span class="required">*</span></label>
+                                        <input type="text" name="state" class="form-control"
+                                            value="<%= address.state %>" placeholder="State" id="state" required />
+                                        <div id="stateError" class="error-message"></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 ">
+                                    <div class="form-group mt-2">
+                                        <label for="pincode">Postcode / Zip <span class="required">*</span></label>
+                                        <input type="number" name="pincode" class="form-control"
+                                            value="<%= address.pincode %>" id="pincode" required />
+                                        <div id="pincodeError" class="error-message"></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mt-2">
+                                        <label for="phone">Phone <span class="required">*</span></label>
+                                        <input type="number" name="phone" class="form-control"
+                                            value="<%= address.phone %>" placeholder="Phone" id="phone" required />
+                                        <div id="phoneError" class="error-message"></div>
+                                    </div>
+                                </div>
+                                <input id="userId" value="<%= address._id %>" hidden />
+                            </div>
+                            <button type="submit" class="btn btn-primary my-3">Update Address</button>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+        </div>
+    </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function validateForm() {
+        resetErrorMessages();
+
+        var name = document.getElementById("name").value;
+        var address = document.getElementById("address").value;
+        var town = document.getElementById("town").value;
+        var state = document.getElementById("state").value;
+        var pincode = document.getElementById("pincode").value;
+        var phone = document.getElementById("phone").value;
+
+        // Validate each input field
+        if (name.trim() === "") {
+            showError("nameError", "Please enter a name.");
+            return false;
+        }
+
+        if (address.trim() === "") {
+            showError("addressError", "Please enter an address.");
+            return false;
+        }
+
+        if (town.trim() === "") {
+            showError("townError", "Please enter a town/city.");
+            return false;
+        }
+
+        if (state.trim() === "") {
+            showError("stateError", "Please enter a state.");
+            return false;
+        }
+
+        if (pincode.trim() === "") {
+            showError("pincodeError", "Please enter a postcode/zip.");
+            return false;
+        }
+
+        if (!phone.match(/^\d{10}$/)) {
+            showError("phoneError", "Please enter a valid 10-digit phone number.");
+            return false;
+        }
+
+
+        return true;
+    }
+
+    function showError(elementId, message) {
+        var errorElement = document.getElementById(elementId);
+        errorElement.innerHTML = message;
+    }
+
+    function resetErrorMessages() {
+        var errorElements = document.querySelectorAll(".error-message");
+        errorElements.forEach(function (element) {
+            element.innerHTML = "";
+        });
+    }
+
+    document.getElementById('myForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        if (validateForm()) {
+            const name = document.getElementById('name').value;
+            const address = document.getElementById('address').value;
+            const city = document.getElementById('town').value;
+            const state = document.getElementById('state').value;
+            const pincode = document.getElementById('pincode').value;
+            const mobile = document.getElementById('phone').value;
+            const userId = document.getElementById('userId').value;
+
+            const formData = {
+                name,
+                address,
+                city,
+                state,
+                pincode,
+                mobile,
+                userId
+            };
+
+            Swal.fire({
+                title: "Edit Address ?",
+                text: "Are you sure you want to update this Address",
+                icon: "warning",
+                showCancelButton: true,
+                cancelButtonText: "No, Cancel",
+                confirmButtonText: "Yes, Update Address",
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/editAddress', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    }).then(response => {
+                        if (response.ok) {
+                            Swal.fire({
+                                title: "Edited successfully",
+                                text: "success",
+                                icon: "success",
+                            })
+                                .then(() => {
+                                    location.assign("/address")
+                                })
+
+                        } else {
+                            Swal.fire({
+                                title: "Error",
+                                text: "Error Occured",
+                                icon: "error",
+
+                            })
+                        }
+                    })
+                }
+            })
+        }
+    });
+</script>
+
+
+<style>
+    .error-message {
+        color: red;
+        margin-top: 5px;
+    }
+</style>

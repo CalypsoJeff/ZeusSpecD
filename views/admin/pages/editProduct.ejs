@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Product</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
+</head>
+
+<body>
+  <div class="container">
+    <h2 mt-2>Edit Product</h2>
+    <form action="/admin/product/editProduct/<%= product._id %>" method="post" enctype="multipart/form-data"
+      onsubmit="return validateForm()">
+      <div class="card">
+        <div class="card-body">
+          <hr class="mb-4 mt-0">
+          <div class="row">
+            <div class="col-md-3">
+              <h6>1. General info</h6>
+            </div>
+            <div class="col-md-9">
+              <div class="mb-4">
+                <label class="form-label">Product title</label>
+                <input type="text" placeholder="Type here" name="title" id="title" class="form-control"
+                  value="<%= product.title %>">
+                <div id="title-error" class="text-danger"></div>
+              </div>
+              <div class="mb-4">
+                <label class="form-label">Description</label>
+                <textarea placeholder="Type here" class="form-control" name="description" id="description"
+                  rows="4"><%= product.description %></textarea>
+                <div id="description-error" class="text-danger"></div>
+              </div>
+              <div class="mb-4">
+                <label class="form-label">Colors</label>
+                <input type="text" placeholder="Type here" name="color" id="color" class="form-control"
+                  value="<%= product.color %>">
+                <div id="color-error" class="text-danger"></div>
+              </div>
+              <div class="mb-4">
+                <label class="form-label">Brand name</label>
+                <input type="text" placeholder="Type here" class="form-control" name="brand" id="brand"
+                  value="<%= product.brand %>">
+                <div id="brand-error" class="text-danger"></div>
+              </div>
+            </div>
+          </div>
+          <hr class="mb-4 mt-0">
+          <div class="row">
+            <div class="col-md-3">
+              <h6>2. Category</h6>
+            </div>
+            <div class="col-md-9">
+              <div class="mb-4">
+                <label class="form-label">Category</label>
+                <select class="form-select" name="categoryName" id="category" required>
+                  <% catList.forEach(cat=> { %>
+                    <option value="<%= cat._id %>" <%=cat._id.equals(product.categoryName._id) ? 'selected' : '' %>><%=
+                        cat.categoryName %>
+                    </option>
+                    <% }); %>
+                </select>
+                <div id="category-error" class="text-danger"></div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-3">
+              <h6>3. Pricing</h6>
+            </div>
+            <div class="col-md-9">
+              <div class="mb-4">
+                <label for="productPrice">Product Price</label>
+                <input type="number" placeholder="₹" name="productPrice" id="productPrice" class="form-control"
+                  value="<%= product.productPrice %>">
+                <div id="productPrice-error" class="text-danger"></div>
+              </div>
+              <div class="mb-4">
+                <label for="offer">Offer(%)</label>
+                <input type="number" placeholder="" name="offer" id="offer" class="form-control"
+                  value="<%= product.offer %>">
+                <div id="offer-error" class="text-danger"></div>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-3">
+              <h6>4. Units</h6>
+            </div>
+            <div class="col-md-9">
+              <div class="mb-4">
+                <label for="quantity">Quantity</label>
+                <input type="number" placeholder="No's" name="quantity" id="quantity" class="form-control"
+                  value="<%= product.quantity %>">
+                <div id="quantity-error" class="text-danger"></div>
+              </div>
+            </div>
+          </div>
+          <hr class="mb-4 mt-0">
+          <div class="row">
+            <div class="col-md-3">
+              <h6>5. Media</h6>
+            </div>
+            <div class="col-md-9">
+              <div class="card p-md-5 p-2 me-md-5">
+                <h5>Choose product images </h5>
+                <span class="fw-normal mb-4 text-success">file supports only: jpeg,jpg,png,webp</span>
+                <span class="fw-bold">Select the Primary Image</span>
+
+                <!-- _________________________ -->
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
+                <!-- ______________________________ -->
+
+                <input type="file" accept=".jpg,.jpeg,.png,.webp,.svg" class="form-control FilUploader"
+                  name="primaryImage" id="primaryImage" onchange="cropBanner('primaryImage')" class="mb-3" <% if
+                  (!product.primaryImage || product.primaryImage.length===0) { %> required <% } %>/>
+                  <input type="hidden" name="existingPrimaryImage"
+                    value="<%= product.primaryImage && product.primaryImage.length > 0 ? product.primaryImage[0].name : '' %>" />
+                  <img src="" id="show_primaryImage" alt="">
+                  <button class="btn btn-primary" id="upload_primaryImage" style="display: none;" type="button"
+                    onclick="uploadBannerImage('primaryImage')">Save</button>
+                  <!-- Display existing primary image -->
+                  <% if (product.primaryImage && product.primaryImage.length> 0) { %>
+                    <div class="col-md-6 mt-2 mr-5">
+                      <% product.primaryImage.forEach(image=> { %>
+                        <img src="/admin/uploads/<%= image.name; %>" class="max-size-image" alt="<%= image.name %>">
+                        <% }); %>
+                    </div>
+                    <% } %>
+                      <div id="primaryImage-error" class="text-danger"></div>
+
+
+                      <span class="fw-bold">Select secondary images <br> <br>
+                        <input type="file" accept=".jpg,.jpeg,.png,.webp,.svg" class="form-control FilUploader"
+                          id="secondaryImages" name="secondaryImage" class="mb-3" <% if (!product.secondaryImages ||
+                          product.secondaryImages.length===0) { %> required <% } %> multiple /><br>
+
+                          <input type="hidden" name="idSecondaryImage" value="<%= product.secondaryImages.name  %>">
+
+                          <!-- Display existing secondary images -->
+                          <% if (product.secondaryImages && product.secondaryImages.length> 0) { %>
+                            <div class="col-md-6 mt-2 mr-5">
+                              <% product.secondaryImages.forEach((image,index )=> { %>
+                                <img src="/admin/uploads/<%= image?.name %>" class="max-size-image mb-3"
+                                  alt="<%= image.name %>">
+                                <label class="form-check-label">
+                                  <input type="checkbox" name="deleteSecondaryImage" value="<%= index %>">
+                                  Delete <%= image.name %>
+                                </label><br>
+                                <% }); %>
+                            </div>
+                            <% } %>
+                              <div id="secondaryImages-error" class="text-danger"></div>
+              </div>
+              <button type="submit" class="btn btn-primary mb-4 mt-2 ">Update Product</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <style>
+    .max-size-image {
+      max-width: 150px;
+      max-height: 150px;
+      width: auto;
+      height: auto;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+  <script>
+    let cropper;
+    function cropBanner(id) {
+      const input = document.getElementById(id);
+      const canvas = document.getElementById(`show_${id}`);
+      const file = input.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          canvas.src = e.target.result;
+          if (cropper) {
+            cropper.destroy();
+          }
+          cropper = new Cropper(canvas, {
+            viewMode: 2,
+          });
+        };
+        reader.readAsDataURL(file);
+        document.getElementById('upload_' + id).style.display = 'block'
+      } else {
+        canvas.src = '';
+        if (cropper) {
+          cropper.destroy();
+        }
+      }
+    }
+    function uploadBannerImage(id) {
+      const canvas = cropper.getCroppedCanvas();
+      if (canvas) {
+        canvas.toBlob((blob) => {
+          const fileName = 'croppedImage.jpg';
+          const file = new File([blob], fileName, { type: 'image/jpeg' });
+          const input = document.getElementById(id);
+          if (DataTransfer && FileList) {
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            input.files = dataTransfer.files;
+          } else {
+            console.error('FileList and DataTransfer are not supported in this browser.');
+          }
+          const showImg = document.getElementById(`show_${id}`);
+          showImg.src = URL.createObjectURL(blob);
+          cropper.destroy();
+        });
+        document.getElementById('upload_' + id).style.display = 'none'
+      }
+    }
+
+
+    // validateForm function
+    function validateForm() {
+      var title = document.getElementById('title').value;
+      var description = document.getElementById('description').value;
+      var color = document.getElementById('color').value;
+      var brand = document.getElementById('brand').value;
+      var productPrice = document.getElementById('productPrice').value;
+      var offer = document.getElementById('offer').value;
+      var quantity = document.getElementById('quantity').value;
+      var primaryImage = document.getElementById('primaryImage').value;
+      var secondaryImages = document.getElementById('secondaryImages').value;
+      var category = document.getElementById('category').value;
+
+      // Function to display error messages
+      function displayError(inputId, errorMessage) {
+        var errorElement = document.getElementById(inputId + '-error');
+        if (errorMessage) {
+          errorElement.textContent = errorMessage;
+        } else {
+          errorElement.textContent = '';
+        }
+      }
+      // Validation logic for each field...
+      if (title.trim() === "") {
+        displayError('title', 'Please enter a product title');
+        return false;
+      } else {
+        displayError('title', '');
+      }
+
+      if (description.trim() === "") {
+        displayError('description', 'Please enter a valid description');
+        return false;
+      } else {
+        displayError('description', '');
+      }
+
+      if (color.trim() === "") {
+        displayError('color', 'Please enter a product color');
+        return false;
+      } else {
+        displayError('color', '');
+      }
+
+      if (brand.trim() === "") {
+        displayError('brand', 'Please enter a product brand');
+        return false;
+      } else {
+        displayError('brand', '');
+      }
+
+      if (category === "") {
+        displayError('category', 'Please select a category');
+        return false;
+      } else {
+        displayError('category', '');
+      }
+
+      if (isNaN(productPrice) || productPrice <= 0) {
+        displayError('productPrice', 'Please enter a valid product price');
+        return false;
+      } else {
+        displayError('productPrice', '');
+      }
+
+      if (offer === '') {
+        // If offer is empty, clear any existing error message for the offer field
+        displayError('offer', '');
+      } else if (isNaN(offer) || offer < 0 || offer > 100) {
+        // If offer is not a number or not in the 0 to 100 range, display an error message
+        displayError('offer', 'Please enter a valid offer percentage between 0 and 100');
+        return false;
+      } else {
+        // If offer is within the valid range or empty, clear any existing error message
+        displayError('offer', '');
+      }
+      if (isNaN(quantity) || quantity <= 0) {
+        displayError('quantity', 'Please enter a valid quantity');
+        return false;
+      } else {
+        displayError('quantity', '');
+      }
+
+      // If all validations pass
+      return true;
+    }
+
+
+  </script>

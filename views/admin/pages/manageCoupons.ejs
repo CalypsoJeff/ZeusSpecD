@@ -1,0 +1,117 @@
+<section class = "content-main">
+<div class="container">
+    <div class="mt-5">
+        <div class="my-3 d-flex justify-content-between">
+            <div class="col-10">
+                <form action="/admin/searchCoupons" method="post">
+                    <div class="d-flex">
+                        <input type="text" class="form-control" name="search" placeholder="Search coupons" autocomplete="off">
+                        <button  type="submit" class="btn border"><i class="fas fa-magnifying-glass"></i></button>
+                    </div>
+                </form>
+            </div>
+            <div>
+                <a href="/admin/addCoupon" class="btn btn-warning">Add new coupon</a>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table">
+                <thead class="bg-primary text-white shadow-sm border">
+                    <tr>
+                        <th>Coupon code</th>
+                        <th>Coupon id</th>
+                        <th>Status</th>
+                        <th>Expirey Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <%if(locals.coupons !=null){%>
+                        <%locals.coupons.forEach((coupon)=>{%>
+                            <tr class="lh-lg">
+                                <td style="font-weight: bold;">
+                                    <%=coupon.couponName%>
+                                </td>
+                                <td style="font-weight: bold;">
+                                    <%=coupon._id%>
+                                </td>
+                                <td style="font-weight: bold;">
+                                    <%=coupon.isExpired==true?'Expired':'Available';%>
+                                </td>
+                                <td style="font-weight: bold;">
+                                    <% console.log(coupon); %>
+                                    <% if (coupon.expiredOn && coupon.expiredOn.day) { %>
+                                        <%= coupon.expiredOn.day %>
+                                    <% } else { %>
+                                        <!-- Handle the case where expiredOn or expiredOn.day is undefined -->
+                                        Not Specified
+                                    <% } %>
+                                </td>
+                            </tr>
+                            <% }) %>
+                                <% } %>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+
+    <!-- pagination -->
+    <div class="mt-5">
+        <nav aria-label="...">
+            <%if(locals.totalPages){%>
+                <ul class="pagination">
+                    <%if(locals.currentPage> 1){%>
+                        <li class="page-item">
+                            <a href="/admin/manageCoupons/<%=currentPage - 1 %>"
+                                class="page-link">Previous</a>
+                            </form>
+                        </li>
+                        <% } %>
+                            <%for(let i=1;i<=totalPages;i++){%>
+
+
+                                <li class="page-item">
+                                    <a href="/admin/manageCoupons/<%=i%>"
+                                        class="page-link <%=locals.currentPage === i ? 'bg-primary text-white':''%>">
+                                        <%=i%>
+                                    </a>
+                                </li>
+
+
+                                <% } %>
+                                    <%if(locals.currentPage < locals.totalPages){ %>
+                                        <li class="page-item">
+                                            <a href="/admin/manageCoupons/<%= currentPage + 1 %>"
+                                                class="page-link">Next</a>
+
+                                        </li>
+                                        <% } %>
+                </ul>
+                <% } %>
+        </nav>
+    </div>
+    <!-- /pagination -->
+
+
+</div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+    crossorigin="anonymous"></script>
+
+
+    <style>
+.table thead th {
+    background-color: darkcyan; 
+    color: #ffffff; 
+    padding: 10px; 
+}
+
+.table tbody th {
+    font-weight: bold; 
+}
+
+        
+    </style>

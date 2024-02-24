@@ -1,0 +1,468 @@
+<div class="container pt-150">
+  <!-- Shipping Address Card -->
+  <div class="card">
+    <h4>Shipping Address</h4>
+    <form>
+      <label for="savedAddresses">Select Address:</label>
+      <select id="savedAddresses" name="savedAddresses">
+        <option value="savedAddresses">Select Address</option>
+
+        <!-- Iterate through saved addresses from address.ejs -->
+        <% address.forEach((element) => { %>
+        <option value="<%= element._id %>">
+          <%= element.user_name %>, <%= element.phone %>, <%= element.address
+          %>, <%= element.town %>, <%= element.state %>, <%= element.pincode %>
+        </option>
+        <% }) %>
+      </select>
+
+      <button type="button" onclick="addNewAddress()">Add Address</button>
+    </form>
+  </div>
+
+  <!-- Cart Items Card -->
+  <div class="card">
+    <h4>Cart Items</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Quantity</th>
+          <th>Price</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% getCart.forEach((cartItem) => { %> <%
+        cartItem.products.forEach((productItem) => { %>
+        <tr>
+          <td class="column-2"><%= productItem.productId.title %></td>
+          <td class="column-3"><%= productItem.quantity %></td>
+          <td class="column-4"><%= productItem.productId.salePrice %></td>
+
+        </tr>
+        <% }) %> <% }) %>
+
+        <!-- <tr>
+          <td class="column-2">Total</td>
+          <td class="column-3">₹<%= total %></td>
+        </tr> -->
+      </tbody>
+    </table>
+  </div>
+
+
+<!-- card for price details -->
+<div class="card">
+  <h4 style="color: #333; margin-bottom: 15px;">Price Details</h4>
+  <ul style="list-style-type: none; padding: 0;">
+    <li style="border-bottom: 1px solid #ddd; padding: 10px 0; display: flex; justify-content: space-between; align-items: center;">
+      <span>Total</span>
+      <span style="font-weight: bold; color: #333;">
+        <i class="fas fa-indian-rupee-sign"></i>
+        ₹<%= total %>
+        <!-- Add logic to display total amount -->
+        <!-- Example assuming you have a totalAmount variable -->
+       
+      </span>
+    </li>
+    <li style="border-bottom: 1px solid #ddd; padding: 10px 0; display: flex; justify-content: space-between; align-items: center;">
+      Delivery Charges
+      <span style="color: green;">Free</span>
+  </li>
+    <li style="border-bottom: 1px solid #ddd; padding: 10px 0; display: flex; justify-content: space-between; align-items: center;">
+      <span>Discount Amount</span>
+      <span style="font-weight: bold; color: #333;">
+        <i class="fas fa-indian-rupee-sign"></i>
+        <!-- Add logic to display discount amount -->
+        <!-- Example assuming you have a discountAmount variable -->
+        <span id="discountAmount">0</span>
+      </span>
+    </li>
+    <li style="padding: 10px 0; display: flex; justify-content: space-between; align-items: center;">
+      <span>Total Amount</span>
+      <span style="font-weight: bold; color: #333;">
+        <i class="fas fa-indian-rupee-sign"></i>
+        <p id="totalAmount" class="d-inline">
+          <!-- Add logic to display total amount -->
+          <!-- Example assuming you have a totalAmount variable -->
+          ₹<%= total %>
+        </p>
+      </span>
+    </li>
+    <br><br><br>
+    <div>
+      <form action="#" id="couponForm">
+        <h5>Select Coupon</h5>
+        <div class="my-3">
+          <select class="form-control" id="coupon" required>
+
+            <option value="">Select....</option>
+            <%for(let i=0 ; i < allCoupons.length ; i++){ %>
+              <option value="<%=allCoupons[i].discount%>">
+                  <%=allCoupons[i].couponName%>
+              </option>
+              <% }%>
+          </select>
+        </div>
+
+        <div class="d-flex justify-content-end">
+          <button type="button" class="btn btn-danger me-2 mr-3" id="removeCoupon">Remove</button>
+          <button type="submit" class="btn btn-success" id="applyCouponBtn">Apply</button>
+      </div>
+  </form>
+</div>
+
+  </ul>
+  
+</div>
+
+  <!-- Payment Card -->
+  <div class="card">
+    <h4>Payment Method</h4>
+    <form>
+      <label for="paymentMethod">Select Payment Method:</label>
+      <select id="paymentMethod" name="paymentMethod">
+        <option value="" disabled selected>Select Payment Method</option>
+        <option value="cashonDelivery">Cash On Delivery</option>
+        <option value="razorpay">Razorpay</option>
+        <% if (walletAmount && walletAmount.balance >= total) { %>
+        <option value="wallet">Wallet</option>
+        <% } %>
+      </select>
+      <button type="button" class="place-order-btn" onclick="placeOrder()">
+        Place Order
+      </button>
+    </form>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<script>
+
+  function continueShopping() {
+    window.location.href = "/shop";
+  }
+  // Function to use the selected address
+  function useSelectedAddress() {
+    var selectedAddress = document.getElementById("savedAddresses").value;
+    // Perform actions with the selected address (e.g., update shipping details)
+    console.log("Selected Address:", selectedAddress);
+  }
+
+  // Function to navigate to the page for adding a new address (if needed)
+  function addNewAddress() {
+    // Redirect to the addAddress page or perform other actions as needed
+    window.location.href = "/addAddress";
+  }
+
+  function placeOrder() {
+    // Validate if the user has selected an address and a payment method
+    var selectedAddress = document.getElementById("savedAddresses").value;
+    var selectedPaymentMethod = document.getElementById("paymentMethod").value;
+    //total after coupon apply
+    const totalAmountElement = document.getElementById('totalAmount');
+    const totalAmountText = totalAmountElement.innerText;
+    const total = parseFloat(totalAmountText.replace('₹', ''));
+    console.log(total);
+    //
+
+    const Coupon = document.getElementById('coupon');
+    const appliedCoupon = Coupon.innerText.replace("Select....","")
+    console.log(selectedAddress, selectedPaymentMethod, appliedCoupon);
+    if (!selectedAddress || selectedAddress === "savedAddresses") {
+      // If address is not selected or the default value is selected, show an alert to the user
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Please select a valid address before placing the order.",
+        confirmButtonColor: "#3085d6",
+      });
+      return; // Exit the function if validation fails
+    }
+
+    if (!selectedPaymentMethod) {
+      // If payment method is not selected, show an alert to the user
+      Swal.fire({
+        icon: "error",
+        title: "Oops...",
+        text: "Please select a payment method before placing the order.",
+        confirmButtonColor: "#3085d6",
+      });
+      return; // Exit the function if validation fails
+    }
+
+    // Proceed with placing the order if all required fields are selected
+    Swal.fire({
+      position: "center",
+      icon: "question",
+      title: "Confirm Order?",
+      showConfirmButton: true,
+      showCancelButton: true,
+      confirmButtonText: "OK",
+      cancelButtonText: "Continue Shopping",
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#3085d6",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          const response = await fetch("/confirm-order", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ selectedAddress, selectedPaymentMethod, total, appliedCoupon }),
+          });
+
+          if (response.ok) {
+            const responseData = await response.json();
+            console.log("////",responseData);
+
+            if (selectedPaymentMethod === "cashonDelivery" || selectedPaymentMethod === 'wallet') {
+              await Swal.fire(
+                "Success",
+                "Order Placed successfully",
+                "success"
+              );
+              window.location.href = "/";
+            } else if (selectedPaymentMethod === "razorpay") {
+              // Initialize Razorpay checkout
+              const orderDetails = responseData.orderDetails
+              const options = {
+                key: "rzp_test_2Nt1HkMmuzZoc7",
+                amount: responseData.razorpayOrder.amount,
+                currency: "INR",
+                order_id: responseData.razorpayOrder.id,
+                name: "Your Store",
+                description: "Payment for Your Order",
+                image: "",
+                handler: async function (response) {
+                  console.log(response);
+                  // Handle the Razorpay success callback
+                  console.log(
+                    "Razorpay Payment ID:",
+                    response.razorpay_payment_id
+                  );
+                  console.log("Razorpay Order ID:", response.razorpay_order_id);
+                  console.log(
+                    "Razorpay Signature:",
+                    response.razorpay_signature
+                  );
+
+                  // Perform any additional actions (e.g., update order status)
+                  // Redirect to success page
+                  console.log("////////////////",response, response.razorpay_order_id, response.razorpay_payment_id, orderDetails  );
+                  verifyPayment(response, response.razorpay_order_id, response.razorpay_payment_id, orderDetails);
+                  //  window.location.href = "/";
+                },
+                prefill: {
+                  name: "Your Name",
+                  email: "your.email@example.com",
+                  contact: "Your Contact Number",
+                },
+                notes: {
+                  address: "Your Delivery Address",
+                },
+                theme: {
+                  color: "#F37254",
+                },
+              };
+              console.log("Before Razorpay Initialization");
+              const rzp = new Razorpay(options);
+              console.log("Before rzp.open()");
+              rzp.open();
+              console.log("After rzp.open()");
+            } else if (selectedPaymentMethod === "wallet") {
+              // Validate if the wallet balance is sufficient
+              if (walletAmount && walletAmount.balance >= total) {
+                // Deduct the payment amount from the wallet balance
+                const updatedWalletBalance = walletAmount.balance - total;
+
+                // Make a request to update the wallet balance in the database
+                const updateWalletResponse = await fetch("/confirm-order", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    userId: req.session.user_id,
+                    newBalance: updatedWalletBalance,
+                  }),
+                });
+                alert(updateWalletResponse)
+
+                if (updateWalletResponse.ok) {
+                  console.log("Update wallet response:", updateWalletResponse);
+                  await Swal.fire(
+                    "Success",
+                    "Order Placed successfully using Wallet",
+                    "success"
+                  );
+                  window.location.href = "/";
+                } else {
+                  console.log("Failed to update wallet balance.");
+                  // Handle the case where updating the wallet balance fails
+                }
+              } else {
+                Swal.fire({
+                  icon: "error",
+                  title: "Oops...",
+                  text: "Insufficient Balance",
+                  confirmButtonColor: "#3085d6",
+                });
+              }
+            }
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      } else {
+        continueShopping();
+      }
+    });
+  }
+
+  async function verifyPayment(payment, order, orderId, orderdetails) {
+    try {
+      console.log(payment, order, orderId, orderdetails);
+
+        const response = await fetch('/verify-payment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ payment, order, orderId, orderdetails }),
+        });
+
+        console.log("Response status:", response.status);
+
+        if (response.ok) {
+            window.location.href = '/';
+        } else {
+            const errorData = await response.json();
+            await Swal.fire('Error', errorData.error, 'error');
+        }
+    } catch (error) {
+        console.log(error.message);
+    }
+}
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    let couponForm = document.getElementById('couponForm');
+    let discountPrice = 0; // Initialize discountPrice
+
+    couponForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      let totalPrice = parseInt('<%= total %>');
+      let selectedCoupon = document.getElementById('coupon');
+      let removeCouponBtn = document.getElementById('removeCoupon');
+
+      // Remove coupon
+      removeCouponBtn.addEventListener('click', () => {
+        selectedCoupon.value = '';
+        discountPrice = 0; // Reset discountPrice
+        updatePrices(totalPrice, discountPrice); // Pass 0 as the discountPrice
+       
+      });
+
+      // Applying coupon
+      if (selectedCoupon.value !== '') {
+        let couponName = selectedCoupon.options[selectedCoupon.selectedIndex].innerText.trim();
+        let discount = parseInt(selectedCoupon.value);
+        let discountPrice = Math.floor((totalPrice * discount) / 100);
+        let newPrice = totalPrice - discountPrice;
+
+       
+        updatePrices(newPrice, discountPrice);
+
+        document.getElementById('couponDiscount').innerText = `Discount Amount  - ₹${discountPrice}`;
+        document.getElementById('totalAmount').innerText = `₹${newPrice}`;
+        document.getElementById('orderCoupon').value = couponName;
+
+        
+      removeCouponBtn.style.display = 'inline-block'; // Show remove button
+      }
+    });
+  });
+
+  function updatePrices(newPrice, discountPrice) {
+    document.getElementById('totalAmount').innerText = `₹${newPrice}`;
+    // Check if discountPrice is positive or zero
+  const discountText = (discountPrice >= 0) ? `₹${discountPrice}` : `₹${-discountPrice}`;
+    document.getElementById('discountAmount').innerHTML = `<span class="text-danger">${(discountPrice !== 0) ? '-' : ''} ${discountText}</span>`;
+  }
+</script>
+<style>
+  .container {
+    max-width: 800px;
+  }
+
+  .card {
+    border: 1px solid #ddd;
+    padding: 95px;
+    margin-bottom: 20px;
+  }
+
+  h4 {
+    color: #333;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+  }
+
+  label {
+    margin-bottom: 8px;
+  }
+
+  input,
+  textarea,
+  select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 12px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+  }
+
+  th,
+  td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+
+  .payment-option {
+    display: flex;
+    align-items: center;
+  }
+
+  .payment-option input {
+    margin-right: 8px;
+  }
+
+  button {
+    background-color: #4caf50;
+    color: white;
+    padding: 10px;
+    border: none;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+
+  button:hover {
+    background-color: #45a049;
+  }
+</style>
+
+
+
+
