@@ -5,10 +5,10 @@ const asyncHandler = require("express-async-handler");
 const Product = require("../models/productModel");
 const Category = require("../models/categoryModel");
 const Banner = require('../models/bannerModel.js')
-const { sendOtp } = require("../utility/nodemailer");
+const { sendOtp } = require("../utility/nodeMailer.js");
 const randomstring = require("randomstring");
-const { sendVerifymail } = require("../utility/nodemailer");
-const { generateOTP } = require("../utility/nodemailer"); // Adjust the path accordingly
+const { sendVerifymail } = require("../utility/nodeMailer.js");
+const { generateOTP } = require("../utility/nodeMailer.js"); // Adjust the path accordingly
 
 const loadlandingpage = async (req, res) => {
   try {
