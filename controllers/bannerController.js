@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const Banner = require("../models/BannerModel");
+const Banner = require("../models/bannerModel");
 
 function newformatDate(date) {
   const day = String(date.getDate()).padStart(2, '0');
