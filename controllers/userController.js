@@ -1,10 +1,10 @@
-const User = require("../models/usermodels");
+const User = require("../models/userModels.js");
 const Wallet = require("../models/walletModel")
 const bcrypt = require("bcrypt");
 const asyncHandler = require("express-async-handler");
 const Product = require("../models/productModel");
 const Category = require("../models/categoryModel");
-const Banner = require('../models/BannerModel')
+const Banner = require('../models/bannerModel.js')
 const { sendOtp } = require("../utility/nodemailer");
 const randomstring = require("randomstring");
 const { sendVerifymail } = require("../utility/nodemailer");
